@@ -1,7 +1,7 @@
 <h2>Panel de Jefe de Tránsito</h2>
 <p>Bienvenido, {{ request.user.username }}</p>
 <p><a href="/">Inicio</a> | <a href="/accounts/logout/">Cerrar sesión</a></p>
-
+<p><a href="{% url 'trafico_tiempo_real' %}">📈 Ver tráfico en tiempo real</a></p>
 <hr>
 
 <h3>Filtrar accidentes</h3>

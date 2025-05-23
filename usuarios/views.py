@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .forms import AccidenteForm
 from movilidad.models import Accidente, CamaraSeguridad, ZonaCritica
+from yolo.models import TraficoTiempoReal
 from django import forms
 
 @login_required
@@ -45,9 +46,9 @@ def panel_jefe(request):
     if gravedad:
         accidentes = accidentes.filter(gravedad__icontains=gravedad)
     if desde:
-        accidentes = accidentes.filter(fecha_hora_date_gte=desde)
+        accidentes = accidentes.filter(fecha_hora__date__gte=desde)
     if hasta:
-        accidentes = accidentes.filter(fecha_hora_date_lte=hasta)
+        accidentes = accidentes.filter(fecha_hora__date__lte=hasta)
 
     return render(request, 'usuarios/panel_jefe.html', {
         'accidentes': accidentes,
@@ -57,6 +58,12 @@ def panel_jefe(request):
             'hasta': hasta
         }
     })
+
+@login_required
+@user_passes_test(es_jefe)
+def trafico_tiempo_real(request):
+    datos = TraficoTiempoReal.objects.order_by('-fecha_hora')[:50]  # últimos 50 registros
+    return render(request, 'usuarios/trafico_tiempo_real.html', {'datos': datos})
 
 # Formularios para administrador local
 class CamaraForm(forms.ModelForm):

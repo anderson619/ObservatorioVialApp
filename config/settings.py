@@ -60,7 +60,7 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '3306',
     } ,
-    'yolodb': {
+    'yolo_db': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'yolo_db',  # Base de datos exclusiva para YOLO
         'USER': 'root',
