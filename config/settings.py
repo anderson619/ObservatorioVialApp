@@ -62,7 +62,7 @@ DATABASES = {
     } ,
     'yolodb': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'yolodb',  # Base de datos exclusiva para YOLO
+        'NAME': 'yolo_db',  # Base de datos exclusiva para YOLO
         'USER': 'root',
         'PASSWORD': 'r00t123',
         'HOST': 'localhost',
@@ -70,6 +70,7 @@ DATABASES = {
     }
 }
 
+DATABASE_ROUTERS = ['config.dbrouters.YoloRouter']
 
 AUTH_PASSWORD_VALIDATORS = [
     {
