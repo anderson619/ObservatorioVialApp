@@ -17,7 +17,7 @@ db = DatabaseManager(
     host='localhost',
     user='root',
     password='r00t123',
-    database='ovial'
+    database='yolo_db'
 )
 
 # --- Inicializar modelos ---
