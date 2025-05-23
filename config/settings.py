@@ -59,8 +59,17 @@ DATABASES = {
         'PASSWORD': 'r00t123',  # cambia por tu contraseña
         'HOST': 'localhost',
         'PORT': '3306',
+    } ,
+    'yolodb': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'yolodb',  # Base de datos exclusiva para YOLO
+        'USER': 'root',
+        'PASSWORD': 'r00t123',
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
 }
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
