@@ -1,0 +1,34 @@
+<h2>Panel de Jefe de Tránsito</h2>
+<p>Bienvenido, {{ request.user.username }}</p>
+<p><a href="/">Inicio</a> | <a href="/accounts/logout/">Cerrar sesión</a></p>
+
+<hr>
+
+<h3>Filtrar accidentes</h3>
+<form method="get">
+  Desde: <input type="date" name="desde" value="{{ filtros.desde }}">
+  Hasta: <input type="date" name="hasta" value="{{ filtros.hasta }}">
+  Gravedad:
+  <select name="gravedad">
+    <option value="">-- Todas --</option>
+    <option value="leve" {% if filtros.gravedad == 'leve' %}selected{% endif %}>Leve</option>
+    <option value="moderado" {% if filtros.gravedad == 'moderado' %}selected{% endif %}>Moderado</option>
+    <option value="grave" {% if filtros.gravedad == 'grave' %}selected{% endif %}>Grave</option>
+  </select>
+  <button type="submit">Filtrar</button>
+</form>
+
+<hr>
+
+<h3>Accidentes registrados</h3>
+<ul>
+  {% for accidente in accidentes %}
+    <li>
+      <strong>{{ accidente.fecha_hora }}</strong> — {{ accidente.descripcion }}<br>
+      Gravedad: {{ accidente.gravedad }} | Vehículos: {{ accidente.vehiculos_involucrados }}<br>
+      Reportado por: {{ accidente.usuario.username }}
+    </li>
+  {% empty %}
+    <li>No se encontraron accidentes con esos filtros.</li>
+  {% endfor %}
+</ul>

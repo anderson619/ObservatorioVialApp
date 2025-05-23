@@ -1,0 +1,9 @@
+<h2>{{ accion }} Cámara de Seguridad</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">{{ accion }}</button>
+</form>
+
+<p><a href="{% url 'panel_adminlocal' %}">Volver al panel</a></p>

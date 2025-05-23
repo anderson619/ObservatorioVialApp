@@ -1,0 +1,15 @@
+<h2>Panel de Agente de Tránsito</h2>
+<p>Bienvenido, {{ request.user.username }}</p>
+<a href="/agente/registrar_accidente/">Registrar Accidente</a>
+
+<h3>Accidentes reportados</h3>
+<ul>
+    {% for accidente in accidentes %}
+        <li>{{ accidente.fecha_hora }} - {{ accidente.descripcion }} ({{ accidente.gravedad }})</li>
+    {% empty %}
+        <li>No se han registrado accidentes aún.</li>
+    {% endfor %}
+</ul>
+    
+<a href="/">Inicio</a>
+<p><a href="/accounts/logout/">Cerrar sesión</a></p>
