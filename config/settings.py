@@ -17,6 +17,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'usuarios',
     'movilidad',
+    'yolo'
 ]
 
 MIDDLEWARE = [
@@ -53,7 +54,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'observatorio',
+        'NAME': 'ovial',
         'USER': 'root',  # cambia por tu usuario
         'PASSWORD': 'r00t123',  # cambia por tu contraseña
         'HOST': 'localhost',
