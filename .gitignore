@@ -72,3 +72,6 @@ dist/
 # Docker
 *.pid
 docker-compose.override.yml
+
+#carpetaConfig 
+config/

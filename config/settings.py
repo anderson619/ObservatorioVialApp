@@ -54,7 +54,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ovial',
+        'NAME': 'observatorio',
         'USER': 'root',  # cambia por tu usuario
         'PASSWORD': 'r00t123',  # cambia por tu contraseña
         'HOST': 'localhost',

@@ -5,7 +5,7 @@
 <hr>
 
 <h3>Cámaras de Seguridad</h3>
-<p><a href="/adminlocal/camaras/nueva/">➕ Crear nueva cámara</a></p>
+<p><a href="/adminlocal/camaras/nueva/"> Crear nueva cámara</a></p>
 <ul>
   {% for camara in camaras %}
     <li>
@@ -70,4 +70,4 @@
     }).addTo(map)
       .bindPopup(<b>Zona Crítica:</b> {{ zona.nombre_zona }}<br><b>Tipo:</b> {{ zona.tipo_problema }}<br>{{ zona.descripcion }});
   {% endfor %}
-</script>
+</script> 
