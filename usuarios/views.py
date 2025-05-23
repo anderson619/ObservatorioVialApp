@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import JsonResponse
 from .forms import AccidenteForm
 from movilidad.models import Accidente, CamaraSeguridad, ZonaCritica
 from django import forms
@@ -76,11 +75,7 @@ class ZonaForm(forms.ModelForm):
 def panel_adminlocal(request):
     camaras = CamaraSeguridad.objects.all().order_by('ubicacion')
     zonas = ZonaCritica.objects.all().order_by('nombre_zona')
-    return render(request, 'usuarios/panel_adminlocal.html', {
-        'camaras': camaras,
-        'zonas': zonas,
-        'mostrar_mapa': True  # bandera para asegurar el mapa
-    })
+    return render(request, 'usuarios/panel_adminlocal.html', {'camaras': camaras, 'zonas': zonas})
 
 @login_required
 @user_passes_test(es_adminlocal)
@@ -145,17 +140,6 @@ def eliminar_zona(request, zona_id):
     zona = get_object_or_404(ZonaCritica, id=zona_id)
     zona.delete()
     return redirect('panel_adminlocal')
-
-# API JSON para Leaflet
-@login_required
-def api_camaras(request):
-    camaras = list(CamaraSeguridad.objects.values('ubicacion', 'latitud', 'longitud', 'estado', 'modelo_ia'))
-    return JsonResponse({'data': camaras})
-
-@login_required
-def api_zonas(request):
-    zonas = list(ZonaCritica.objects.values('nombre_zona', 'descripcion', 'latitud', 'longitud', 'tipo_problema'))
-    return JsonResponse({'data': zonas})
 
 # Registro de accidente solo para agentes
 @login_required
