@@ -75,4 +75,5 @@ docker-compose.override.yml
 
 #carpetaConfig 
 config/
-__pycache__/
+
+**/__pycache__/
