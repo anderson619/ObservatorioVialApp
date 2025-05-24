@@ -74,6 +74,6 @@ dist/
 docker-compose.override.yml
 
 #carpetaConfig 
-config/
+config/local_settings.py
 
 **/__pycache__/
