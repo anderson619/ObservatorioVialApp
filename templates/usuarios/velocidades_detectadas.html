@@ -1,0 +1,75 @@
+<h2>Velocidades Detectadas por Cámaras</h2>
+<p><a href="/">Inicio</a> | <a href="/accounts/logout/">Cerrar sesión</a></p>
+
+<h3>Tabla de velocidades recientes</h3>
+<table border="1">
+    <thead>
+        <tr>
+            <th>Fecha y Hora</th>
+            <th>Velocidad Detectada (km/h)</th>
+            <th>ID Cámara</th>
+            <th>ID Vehículo</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for registro in datos %}
+        <tr {% if registro.velocidad_detectada > 60 %} style="background-color: #ffd1d1;" {% endif %}>
+            <td>{{ registro.fecha_hora }}</td>
+            <td>{{ registro.velocidad_detectada }}</td>
+            <td>{{ registro.camara_id }}</td>
+            <td>{{ registro.vehiculo_id }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">No hay datos.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<hr>
+
+<h3>Gráfico: Velocidades Detectadas</h3>
+<canvas id="graficoVelocidad" width="100%" height="40"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ctx = document.getElementById('graficoVelocidad').getContext('2d');
+
+  const labels = [
+    {% for r in datos reversed %}
+      "{{ r.fecha_hora|date:'H:i' }}",
+    {% endfor %}
+  ];
+
+  const data = {
+    labels: labels,
+    datasets: [{
+      label: 'Velocidad (km/h)',
+      data: [
+        {% for r in datos reversed %}
+          {{ r.velocidad_detectada }},
+        {% endfor %}
+      ],
+      borderColor: 'rgba(255, 99, 132, 1)',
+      backgroundColor: 'rgba(255, 99, 132, 0.2)',
+      fill: true,
+      tension: 0.3
+    }]
+  };
+
+  new Chart(ctx, {
+    type: 'line',
+    data: data,
+    options: {
+      responsive: true,
+      scales: {
+        x: {
+          title: { display: true, text: 'Hora' }
+        },
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: 'Velocidad (km/h)' }
+        }
+      }
+    }
+  });
+</script>

@@ -3,7 +3,9 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from .forms import AccidenteForm
 from movilidad.models import Accidente, CamaraSeguridad, ZonaCritica
 from yolo.models import TraficoTiempoReal
+from yolo.models import SeguimientoVehiculo
 from django import forms
+from django.utils.dateparse import parse_date
 
 @login_required
 def home(request):
@@ -46,9 +48,9 @@ def panel_jefe(request):
     if gravedad:
         accidentes = accidentes.filter(gravedad__icontains=gravedad)
     if desde:
-        accidentes = accidentes.filter(fecha_hora__date__gte=desde)
+        accidentes = accidentes.filter(fecha_hora__date__gte=parse_date(desde))
     if hasta:
-        accidentes = accidentes.filter(fecha_hora__date__lte=hasta)
+        accidentes = accidentes.filter(fecha_hora__date__lte=parse_date(hasta))
 
     return render(request, 'usuarios/panel_jefe.html', {
         'accidentes': accidentes,
@@ -162,3 +164,9 @@ def registrar_accidente(request):
     else:
         form = AccidenteForm()
     return render(request, 'usuarios/registrar_accidente.html', {'form': form})
+
+@login_required
+@user_passes_test(es_jefe)
+def velocidades_detectadas(request):
+    datos = SeguimientoVehiculo.objects.order_by('-fecha_hora')[:50]  # últimos 50 registros
+    return render(request, 'usuarios/velocidades_detectadas.html', {'datos': datos})

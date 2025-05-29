@@ -14,4 +14,5 @@ urlpatterns = [
     path('adminlocal/zonas/editar/<int:zona_id>/', views.editar_zona, name='editar_zona'),
     path('adminlocal/zonas/eliminar/<int:zona_id>/', views.eliminar_zona, name='eliminar_zona'),
     path('jefe/trafico-tiempo-real/', views.trafico_tiempo_real, name='trafico_tiempo_real'),
+    path('jefe/velocidades-detectadas/', views.velocidades_detectadas, name='velocidades_detectadas'),
 ]

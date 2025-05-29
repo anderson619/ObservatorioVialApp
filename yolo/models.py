@@ -12,6 +12,9 @@ class TraficoTiempoReal(models.Model):
         db_table = 'movilidad_traficotiemporeal'
         managed = False
 
+    def __str__(self):
+        return f"{self.fecha_hora} - {self.nivel_congestion}"
+
 class Vehiculo(models.Model):
     tipo = models.CharField(max_length=50)
     camara_id = models.IntegerField()
@@ -20,6 +23,9 @@ class Vehiculo(models.Model):
         app_label = 'yolo'
         db_table = 'movilidad_vehiculo'
         managed = False
+
+    def __str__(self):
+        return self.tipo
 
 class SeguimientoVehiculo(models.Model):
     fecha_hora = models.DateTimeField()
@@ -31,3 +37,6 @@ class SeguimientoVehiculo(models.Model):
         app_label = 'yolo'
         db_table = 'movilidad_seguimientovehiculo'
         managed = False
+
+    def __str__(self):
+        return f"{self.fecha_hora} - {self.velocidad_detectada} km/h"
