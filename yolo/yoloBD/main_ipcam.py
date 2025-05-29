@@ -80,11 +80,11 @@ while cap.isOpened():
         fecha = now.date()
         hora = now.time().strftime("%H:%M:%S")
 
-        db.insert_tracking(vehiculo_id, coordenadas, "", f"{velocidad:.2f} px/s", fecha, hora)
+        db.insert_tracking(vehiculo_id, coordenadas, "", f"{velocidad:.2f} km/h", fecha, hora)
 
         # Dibujar
         cv2.rectangle(frame, (l, t), (r, b), (0, 255, 0), 2)
-        cv2.putText(frame, f"ID {track_id} {velocidad:.1f} px/s", (l, t - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+        cv2.putText(frame, f"ID {track_id} {velocidad:.1f} km/h", (l, t - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
         cv2.putText(frame, f"{color}", (l, b + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
 
     cv2.imshow("Cámara IP - Detección de Vehículos", frame)
