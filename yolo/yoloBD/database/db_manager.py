@@ -19,41 +19,21 @@ class DatabaseManager:
             print(f"❌ Error de conexión: {e}")
             self.conn = None
 
-    def get_or_create_vehicle(self, tipo, color, modelo, marca, tipo_servicio, camara_id, zona_id, identificador):
-        if not self.conn:
-            print("❌ No hay conexión con la base de datos.")
-            return None
-
+    def get_or_create_vehicle(self, clase, color, modelo, marca, tipo_servicio, camara_id, zona_id, identificador):
         cursor = self.conn.cursor()
-
-        # Validar por identificador único
-        query = """
-            SELECT CamaraSeguridad_id_CamaraSeguridad
-            FROM vehiculo
-            WHERE identificador_unico = %s
-        """
-        cursor.execute(query, (identificador,))
+        cursor.execute("SELECT id_vehiculo FROM vehiculo WHERE identificador_unico = %s", (identificador,))
         result = cursor.fetchone()
-
         if result:
             return result[0]
+        else:
+            query = """
+                INSERT INTO vehiculo (Tipo, Color, Modelo, Marca, TipoServicio, CamaraSeguridad_id_CamaraSeguridad, CamaraSeguridad_ZonaCritica_id_ZonaCritica, identificador_unico)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            cursor.execute(query, (clase, color, modelo, marca, tipo_servicio, camara_id, zona_id, identificador))
+            self.conn.commit()
+            return cursor.lastrowid
 
-    # Insertar nuevo
-        insert_query = """
-            INSERT INTO vehiculo (
-                Tipo, Color, Modelo, Marca, TipoServicio,
-                CamaraSeguridad_id_CamaraSeguridad,
-                CamaraSeguridad_ZonaCritica_id_ZonaCritica,
-                identificador_unico
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        """
-        cursor.execute(insert_query, (
-            tipo, color, modelo, marca, tipo_servicio,
-            camara_id, zona_id, identificador
-        ))
-        self.conn.commit()
-
-        return cursor.lastrowid
 
 
     def insert_tracking(self, vehiculo_id, coordenadas, frame_path, velocidad, fecha, hora):
