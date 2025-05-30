@@ -77,3 +77,7 @@ docker-compose.override.yml
 config/local_settings.py
 
 **/__pycache__/
+
+#imagenes 
+
+*.jpg
