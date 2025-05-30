@@ -78,6 +78,21 @@ config/local_settings.py
 
 **/__pycache__/
 
-#imagenes 
-
+# Ignorar todos los archivos .jpg
 *.jpg
+*.jpeg
+
+# Ignorar todos los archivos .png
+*.png
+
+# Ignorar todos los archivos .gif
+*.gif
+
+# Ignorar todos los archivos .svg
+*.svg
+
+# Ignorar todos los archivos .webp
+*.webp
+
+# Ignorar todos los archivos .bmp
+*.bmp
