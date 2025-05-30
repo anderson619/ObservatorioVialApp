@@ -1,36 +1,196 @@
-<h2>Panel de Jefe de Tránsito</h2>
-<p>Bienvenido, {{ request.user.username }}</p>
-<p><a href="/">Inicio</a> | <a href="/accounts/logout/">Cerrar sesión</a></p>
-<p><a href="{% url 'trafico_tiempo_real' %}">📈 Ver tráfico en tiempo real</a></p>
-<p><a href="{% url 'velocidades_detectadas' %}"> Ver velocidades detectadas</a></p>
-<p><a href="{% url 'estadisticas_seguimiento' %}">Estadísticas Seguimiento Vehicular</a></p>
-<hr>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Jefe de Tránsito</title>
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3f37c9;
+      --accent-color: #4895ef;
+      --light-color: #f8f9fa;
+      --dark-color: #212529;
+      --success-color: #4cc9f0;
+      --error-color: #f72585;
+    }
 
-<h3>Filtrar accidentes</h3>
-<form method="get">
-  Desde: <input type="date" name="desde" value="{{ filtros.desde }}">
-  Hasta: <input type="date" name="hasta" value="{{ filtros.hasta }}">
-  Gravedad:
-  <select name="gravedad">
-    <option value="">-- Todas --</option>
-    <option value="leve" {% if filtros.gravedad == 'leve' %}selected{% endif %}>Leve</option>
-    <option value="moderado" {% if filtros.gravedad == 'moderado' %}selected{% endif %}>Moderado</option>
-    <option value="grave" {% if filtros.gravedad == 'grave' %}selected{% endif %}>Grave</option>
-  </select>
-  <button type="submit">Filtrar</button>
-</form>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-<hr>
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 20px;
+    }
 
-<h3>Accidentes registrados</h3>
-<ul>
-  {% for accidente in accidentes %}
-    <li>
-      <strong>{{ accidente.fecha_hora }}</strong> — {{ accidente.descripcion }}<br>
-      Gravedad: {{ accidente.gravedad }} | Vehículos: {{ accidente.vehiculos_involucrados }}<br>
-      Reportado por: {{ accidente.usuario.username }}
-    </li>
-  {% empty %}
-    <li>No se encontraron accidentes con esos filtros.</li>
-  {% endfor %}
-</ul>
+    .panel-container {
+      background-color: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 900px;
+      padding: 40px;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .panel-header h2 {
+      font-size: 28px;
+      color: var(--dark-color);
+      margin-bottom: 10px;
+    }
+
+    .panel-header p {
+      font-size: 16px;
+      color: #6c757d;
+      margin-bottom: 20px;
+    }
+
+    .nav-links {
+      margin-bottom: 30px;
+      font-size: 15px;
+    }
+
+    .nav-links a {
+      color: var(--primary-color);
+      text-decoration: none;
+      margin-right: 15px;
+      font-weight: 500;
+    }
+
+    .nav-links a:hover {
+      text-decoration: underline;
+    }
+
+    h3 {
+      color: var(--dark-color);
+      font-size: 20px;
+      margin-bottom: 15px;
+    }
+
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    form input, form select {
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      min-width: 150px;
+    }
+
+    form input:focus, form select:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(72, 149, 239, 0.2);
+    }
+
+    form button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    form button:hover {
+      background-color: var(--secondary-color);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+    }
+
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    ul li {
+      background-color: #f1f3f5;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      border-left: 5px solid var(--accent-color);
+    }
+
+    ul li strong {
+      color: var(--dark-color);
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #dee2e6;
+      margin: 30px 0;
+    }
+
+    .no-results {
+      color: #6c757d;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="panel-container">
+    <div class="panel-header">
+      <h2>Panel de Jefe de Tránsito</h2>
+      <p>Bienvenido, {{ request.user.username }}</p>
+    </div>
+
+    <div class="nav-links">
+      <a href="/accounts/logout/">🚪 Cerrar sesión</a>
+      <a href="{% url 'trafico_tiempo_real' %}">📈 Tráfico en tiempo real</a>
+      <a href="{% url 'velocidades_detectadas' %}">🚗 Velocidades detectadas</a>
+      <a href="{% url 'estadisticas_seguimiento' %}">📊 Estadísticas Seguimiento</a>
+    </div>
+
+    <h3>🔍 Filtrar accidentes</h3>
+    <form method="get">
+      <label>Desde: <input type="date" name="desde" value="{{ filtros.desde }}"></label>
+      <label>Hasta: <input type="date" name="hasta" value="{{ filtros.hasta }}"></label>
+      <label>Gravedad:
+        <select name="gravedad">
+          <option value="">-- Todas --</option>
+          <option value="leve" {% if filtros.gravedad == 'leve' %}selected{% endif %}>Leve</option>
+          <option value="moderado" {% if filtros.gravedad == 'moderado' %}selected{% endif %}>Moderado</option>
+          <option value="grave" {% if filtros.gravedad == 'grave' %}selected{% endif %}>Grave</option>
+        </select>
+      </label>
+      <button type="submit">Filtrar</button>
+    </form>
+
+    <hr>
+
+    <h3>📋 Accidentes registrados</h3>
+    <ul>
+      {% for accidente in accidentes %}
+        <li>
+          <strong>{{ accidente.fecha_hora }}</strong> — {{ accidente.descripcion }}<br>
+          Gravedad: {{ accidente.gravedad }} | Vehículos: {{ accidente.vehiculos_involucrados }}<br>
+          Reportado por: {{ accidente.usuario.username }}
+        </li>
+      {% empty %}
+        <li class="no-results">No se encontraron accidentes con esos filtros.</li>
+      {% endfor %}
+    </ul>
+  </div>
+</body>
+</html>

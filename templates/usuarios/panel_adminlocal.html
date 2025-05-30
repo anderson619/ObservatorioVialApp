@@ -1,73 +1,177 @@
-<h2>Panel de Administrador Local</h2>
-<p>Bienvenido, {{ request.user.username }}</p>
-<p><a href="/">Inicio</a> | <a href="/accounts/logout/">Cerrar sesión</a></p>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Panel de Administrador Local</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    :root {
+      --primary: #3f37c9;
+      --secondary: #4895ef;
+      --danger: #f72585;
+      --background: #f8f9fa;
+      --text: #212529;
+    }
 
-<hr>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--background);
+      padding: 30px 20px;
+      color: var(--text);
+    }
 
-<h3>Cámaras de Seguridad</h3>
-<p><a href="/adminlocal/camaras/nueva/"> Crear nueva cámara</a></p>
-<ul>
-  {% for camara in camaras %}
-    <li>
-      <strong>{{ camara.ubicacion }}</strong> — Estado: {{ camara.estado }}<br>
-      Lat: {{ camara.latitud }}, Lon: {{ camara.longitud }}<br>
-      IA: {{ camara.modelo_ia }}<br>
-      <a href="/adminlocal/camaras/editar/{{ camara.id }}/">✏️ Editar</a> |
-      <a href="/adminlocal/camaras/eliminar/{{ camara.id }}/" onclick="return confirm('¿Eliminar esta cámara?');">🗑️ Eliminar</a>
-    </li>
-  {% empty %}
-    <li>No hay cámaras registradas.</li>
-  {% endfor %}
-</ul>
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      background: #fff;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
 
-<hr>
+    h2, h3 {
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
 
-<h3>Zonas Críticas</h3>
-<p><a href="/adminlocal/zonas/nueva/">➕ Crear nueva zona crítica</a></p>
-<ul>
-  {% for zona in zonas %}
-    <li>
-      <strong>{{ zona.nombre_zona }}</strong> — {{ zona.tipo_problema }}<br>
-      {{ zona.descripcion }}<br>
-      Lat: {{ zona.latitud }}, Lon: {{ zona.longitud }}<br>
-      <a href="/adminlocal/zonas/editar/{{ zona.id }}/">✏️ Editar</a> |
-      <a href="/adminlocal/zonas/eliminar/{{ zona.id }}/" onclick="return confirm('¿Eliminar esta zona crítica?');">🗑️ Eliminar</a>
-    </li>
-  {% empty %}
-    <li>No hay zonas críticas registradas.</li>
-  {% endfor %}
-</ul>
+    p, ul, li {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
 
-<hr>
-<h3>Mapa de Cámaras y Zonas Críticas</h3>
-<div id="map" style="height: 500px;"></div>
+    a {
+      color: var(--secondary);
+      text-decoration: none;
+      font-weight: bold;
+    }
 
-<!-- Leaflet CSS y JS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    a:hover {
+      text-decoration: underline;
+    }
 
-<script>
-  const map = L.map('map').setView([1.2136, -77.2811], 13);  // Punto de enfoque
+    hr {
+      margin: 30px 0;
+      border: none;
+      height: 2px;
+      background-color: #dee2e6;
+    }
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '© OpenStreetMap'
-  }).addTo(map);
+    ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
 
-  // Cámaras
-  {% for cam in camaras %}
-    L.marker([{{ cam.latitud }}, {{ cam.longitud }}])
-      .addTo(map)
-      .bindPopup(<b>Cámara:</b> {{ cam.ubicacion }}<br><b>Estado:</b> {{ cam.estado }}<br><b>IA:</b> {{ cam.modelo_ia }});
-  {% endfor %}
+    li {
+      background-color: #f1f3f5;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
 
-  // Zonas Críticas
-  {% for zona in zonas %}
-    L.circleMarker([{{ zona.latitud }}, {{ zona.longitud }}], {
-      radius: 8,
-      color: 'red',
-      fillOpacity: 0.6
-    }).addTo(map)
-      .bindPopup(<b>Zona Crítica:</b> {{ zona.nombre_zona }}<br><b>Tipo:</b> {{ zona.tipo_problema }}<br>{{ zona.descripcion }});
-  {% endfor %}
-</script> 
+    .map-container {
+      height: 500px;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-top: 20px;
+    }
+
+    .top-links {
+      margin-bottom: 15px;
+    }
+
+    .top-links a {
+      margin-right: 10px;
+      background-color: var(--secondary);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 8px;
+      transition: background 0.3s;
+    }
+
+    .top-links a:hover {
+      background-color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Panel de Administrador Local</h2>
+    <p>Bienvenido, <strong>{{ request.user.username }}</strong></p>
+    <div class="top-links">
+      <a href="/">🏠 Inicio</a>
+      <a href="/accounts/logout/">🚪 Cerrar sesión</a>
+    </div>
+
+    <hr>
+
+    <h3>📷 Cámaras de Seguridad</h3>
+    <p><a href="/adminlocal/camaras/nueva/">➕ Crear nueva cámara</a></p>
+    <ul>
+      {% for camara in camaras %}
+        <li>
+          <strong>{{ camara.ubicacion }}</strong> — Estado: {{ camara.estado }}<br>
+          Lat: {{ camara.latitud }}, Lon: {{ camara.longitud }}<br>
+          IA: {{ camara.modelo_ia }}<br>
+          <a href="/adminlocal/camaras/editar/{{ camara.id }}/">✏️ Editar</a> |
+          <a href="/adminlocal/camaras/eliminar/{{ camara.id }}/" onclick="return confirm('¿Eliminar esta cámara?');">🗑️ Eliminar</a>
+        </li>
+      {% empty %}
+        <li>No hay cámaras registradas.</li>
+      {% endfor %}
+    </ul>
+
+    <hr>
+
+    <h3>🚧 Zonas Críticas</h3>
+    <p><a href="/adminlocal/zonas/nueva/">➕ Crear nueva zona crítica</a></p>
+    <ul>
+      {% for zona in zonas %}
+        <li>
+          <strong>{{ zona.nombre_zona }}</strong> — {{ zona.tipo_problema }}<br>
+          {{ zona.descripcion }}<br>
+          Lat: {{ zona.latitud }}, Lon: {{ zona.longitud }}<br>
+          <a href="/adminlocal/zonas/editar/{{ zona.id }}/">✏️ Editar</a> |
+          <a href="/adminlocal/zonas/eliminar/{{ zona.id }}/" onclick="return confirm('¿Eliminar esta zona crítica?');">🗑️ Eliminar</a>
+        </li>
+      {% empty %}
+        <li>No hay zonas críticas registradas.</li>
+      {% endfor %}
+    </ul>
+
+    <hr>
+
+    <h3>🗺️ Mapa de Cámaras y Zonas Críticas</h3>
+    <div id="map" class="map-container"></div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([2.4441, -76.61845], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // Cámaras
+    {% for cam in camaras %}
+      L.marker([{{ cam.latitud }}, {{ cam.longitud }}])
+        .addTo(map)
+        .bindPopup(`<b>Cámara:</b> {{ cam.ubicacion }}<br><b>Estado:</b> {{ cam.estado }}<br><b>IA:</b> {{ cam.modelo_ia }}`);
+    {% endfor %}
+
+    // Zonas Críticas
+    {% for zona in zonas %}
+      L.circleMarker([{{ zona.latitud }}, {{ zona.longitud }}], {
+        radius: 8,
+        color: 'red',
+        fillOpacity: 0.6
+      }).addTo(map)
+        .bindPopup(`<b>Zona Crítica:</b> {{ zona.nombre_zona }}<br><b>Tipo:</b> {{ zona.tipo_problema }}<br>{{ zona.descripcion }}`);
+    {% endfor %}
+  </script>
+</body>
+</html>

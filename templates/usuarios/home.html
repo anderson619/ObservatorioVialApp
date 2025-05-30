@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Inicio - Observatorio Vial</title>
 </head>
 <body>
-    <h1>Bienvenido, {{ request.user.username }}</h1>
-    <p>Estás autenticado como: {{ request.user.groups.first.name }}</p>
-    <p><a href="/accounts/logout/">Cerrar sesión</a></p>
+    <h1>👋 Bienvenido, {{ request.user.username }}</h1>
+    <p>Estás autenticado como: <strong>{{ request.user.groups.first.name }}</strong></p>
+    <p><a href="/accounts/logout/">🚪 Cerrar sesión</a></p>
 </body>
 </html>

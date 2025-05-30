@@ -1,69 +1,199 @@
-<h2>Estadísticas de Seguimiento Vehicular</h2>
-<p><a href="/">Inicio</a> | <a href="/accounts/logout/">Cerrar sesión</a></p>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Estadísticas de Seguimiento Vehicular</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3f37c9;
+      --accent-color: #4895ef;
+      --light-color: #f8f9fa;
+      --dark-color: #212529;
+      --success-color: #4cc9f0;
+      --error-color: #f72585;
+    }
 
-<h3>Tabla de Seguimientos Recientes</h3>
-<table border="1">
-  <tr>
-    <th>Fecha y Hora</th>
-    <th>Velocidad Detectada (km/h)</th>
-    <th>ID Vehículo</th>
-    <th>ID Cámara</th>
-  </tr>
-  {% for reg in datos %}
-  <tr>
-    <td>{{ reg.fecha_hora }}</td>
-    <td>{{ reg.velocidad_detectada }}</td>
-    <td>{{ reg.vehiculo_id }}</td>
-    <td>{{ reg.camara_id }}</td>
-  </tr>
-  {% endfor %}
-</table>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-<hr>
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      color: var(--dark-color);
+    }
 
-<h3>Gráfico: Velocidades Detectadas</h3>
-<canvas id="graficoVelocidades" width="100%" height="40"></canvas>
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      background-color: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+    }
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  const ctx = document.getElementById('graficoVelocidades').getContext('2d');
+    h2 {
+      font-size: 28px;
+      color: var(--dark-color);
+      margin-bottom: 10px;
+    }
 
-  const labels = [
-    {% for reg in datos reversed %}
-      "{{ reg.fecha_hora|date:'H:i' }}",
-    {% endfor %}
-  ];
+    h3 {
+      margin-top: 30px;
+      font-size: 22px;
+      color: var(--secondary-color);
+    }
 
-  const data = {
-    labels: labels,
-    datasets: [{
-      label: 'Velocidad (km/h)',
-      data: [
-        {% for reg in datos reversed %}
-          {{ reg.velocidad_detectada }},
-        {% endfor %}
-      ],
-      borderColor: 'rgba(255, 99, 132, 1)',
-      backgroundColor: 'rgba(255, 99, 132, 0.2)',
-      fill: true,
-      tension: 0.2
-    }]
-  };
+    a {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+      margin: 0 10px 10px 0;
+      display: inline-block;
+    }
 
-  new Chart(ctx, {
-    type: 'line',
-    data: data,
-    options: {
-      responsive: true,
-      scales: {
-        x: {
-          title: { display: true, text: 'Hora' }
+    a:hover {
+      text-decoration: underline;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      background-color: #ffffff;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    th {
+      background-color: var(--accent-color);
+      color: white;
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f1f3f5;
+    }
+
+    hr {
+      margin: 30px 0;
+      border: 0;
+      border-top: 1px solid #dee2e6;
+    }
+
+    canvas {
+      margin-top: 20px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Estadísticas de Seguimiento Vehicular</h2>
+    <p>
+      <a href="/">🏠 Inicio</a>
+      <a href="/accounts/logout/">🚪 Cerrar sesión</a>
+    </p>
+
+    <h3>Tabla de Seguimientos Recientes</h3>
+    <table>
+      <tr>
+        <th>Fecha y Hora</th>
+        <th>Velocidad Detectada (km/h)</th>
+        <th>ID Vehículo</th>
+        <th>ID Cámara</th>
+      </tr>
+      {% for reg in datos %}
+      <tr>
+        <td>{{ reg.fecha_hora }}</td>
+        <td>{{ reg.velocidad_detectada }}</td>
+        <td>{{ reg.vehiculo_id }}</td>
+        <td>{{ reg.camara_id }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+
+    <hr />
+
+    <h3>Gráfico: Velocidades Detectadas</h3>
+    <canvas id="graficoVelocidades" width="100%" height="40"></canvas>
+  </div>
+
+  <script>
+    const ctx = document.getElementById('graficoVelocidades').getContext('2d');
+
+    const labels = [
+      {% for reg in datos reversed %}
+        "{{ reg.fecha_hora|date:'H:i' }}",
+      {% endfor %}
+    ];
+
+    const data = {
+      labels: labels,
+      datasets: [{
+        label: 'Velocidad (km/h)',
+        data: [
+          {% for reg in datos reversed %}
+            {{ reg.velocidad_detectada }},
+          {% endfor %}
+        ],
+        borderColor: 'rgba(67, 97, 238, 1)',
+        backgroundColor: 'rgba(67, 97, 238, 0.2)',
+        fill: true,
+        tension: 0.4
+      }]
+    };
+
+    new Chart(ctx, {
+      type: 'line',
+      data: data,
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            labels: {
+              color: '#212529'
+            }
+          }
         },
-        y: {
-          beginAtZero: true,
-          title: { display: true, text: 'Velocidad (km/h)' }
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Hora',
+              color: '#212529'
+            },
+            ticks: {
+              color: '#212529'
+            }
+          },
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Velocidad (km/h)',
+              color: '#212529'
+            },
+            ticks: {
+              color: '#212529'
+            }
+          }
         }
       }
-    }
-  });
-</script>
+    });
+  </script>
+</body>
+</html>

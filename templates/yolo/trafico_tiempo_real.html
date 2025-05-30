@@ -1,71 +1,306 @@
-<h2>Tráfico en Tiempo Real</h2>
-<p><a href="/">Inicio</a> | <a href="/accounts/logout/">Cerrar sesión</a></p>
-
-<h3>Tabla de registros recientes</h3>
-<table border="1">
-    <tr>
-        <th>Fecha y Hora</th>
-        <th>Nivel de Congestión</th>
-        <th>Cantidad de Vehículos</th>
-        <th>Latitud</th>
-        <th>Longitud</th>
-    </tr>
-    {% for registro in datos %}
-    <tr>
-        <td>{{ registro.fecha_hora }}</td>
-        <td>{{ registro.nivel_congestion }}</td>
-        <td>{{ registro.cantidad_vehiculos }}</td>
-        <td>{{ registro.latitud }}</td>
-        <td>{{ registro.longitud }}</td>
-    </tr>
-    {% endfor %}
-</table>
-
-<hr>
-
-<h3>Gráfico: Cantidad de Vehículos</h3>
-<canvas id="graficoTráfico" width="100%" height="40"></canvas>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  const ctx = document.getElementById('graficoTráfico').getContext('2d');
-
-  const labels = [
-    {% for registro in datos reversed %}
-      "{{ registro.fecha_hora|date:'H:i' }}",
-    {% endfor %}
-  ];
-
-  const data = {
-    labels: labels,
-    datasets: [{
-      label: 'Cantidad de Vehículos',
-      data: [
-        {% for registro in datos reversed %}
-          {{ registro.cantidad_vehiculos }},
-        {% endfor %}
-      ],
-      borderColor: 'rgba(75, 192, 192, 1)',
-      backgroundColor: 'rgba(75, 192, 192, 0.2)',
-      fill: true,
-      tension: 0.2
-    }]
-  };
-
-  new Chart(ctx, {
-    type: 'line',
-    data: data,
-    options: {
-      responsive: true,
-      scales: {
-        x: {
-          title: { display: true, text: 'Hora' }
-        },
-        y: {
-          beginAtZero: true,
-          title: { display: true, text: 'Vehículos' }
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tráfico en Tiempo Real</title>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #4cc9f0;
+            --error-color: #f72585;
+            --gray-color: #6c757d;
+            --border-color: #e9ecef;
+            --table-header-bg: #f1f3f9;
         }
-      }
-    }
-  });
-</script>
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: var(--dark-color);
+        }
+        
+        .traffic-container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .traffic-header {
+            margin-bottom: 30px;
+        }
+        
+        .traffic-header h2 {
+            color: var(--dark-color);
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .nav-links a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+        
+        .nav-links a:hover {
+            background-color: rgba(67, 97, 238, 0.1);
+        }
+        
+        .section-title {
+            font-size: 22px;
+            margin: 30px 0 20px;
+            color: var(--dark-color);
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .traffic-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .traffic-table th {
+            background-color: var(--table-header-bg);
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        .traffic-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .traffic-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .traffic-table tr:hover {
+            background-color: rgba(72, 149, 239, 0.05);
+        }
+        
+        .congestion-low {
+            color: #2ecc71;
+            font-weight: 500;
+        }
+        
+        .congestion-medium {
+            color: #f39c12;
+            font-weight: 500;
+        }
+        
+        .congestion-high {
+            color: #e74c3c;
+            font-weight: 500;
+        }
+        
+        .chart-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .chart-title {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .chart-title::before {
+            content: "📊";
+        }
+        
+        hr {
+            border: none;
+            height: 1px;
+            background-color: var(--border-color);
+            margin: 30px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .traffic-container {
+                padding: 25px;
+            }
+            
+            .traffic-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .nav-links {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="traffic-container">
+        <div class="traffic-header">
+            <h2>Tráfico en Tiempo Real</h2>
+            
+            <div class="nav-links">
+                <a href="/">🏠 Inicio</a>
+                <a href="/accounts/logout/">🔒 Cerrar sesión</a>
+            </div>
+        </div>
+        
+        <h3 class="section-title">Tabla de registros recientes</h3>
+        <table class="traffic-table">
+            <thead>
+                <tr>
+                    <th>Fecha y Hora</th>
+                    <th>Nivel de Congestión</th>
+                    <th>Cantidad de Vehículos</th>
+                    <th>Latitud</th>
+                    <th>Longitud</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for registro in datos %}
+                <tr>
+                    <td>{{ registro.fecha_hora }}</td>
+                    <td class="congestion-{{ registro.nivel_congestion|lower }}">
+                        {{ registro.nivel_congestion }}
+                    </td>
+                    <td>{{ registro.cantidad_vehiculos }}</td>
+                    <td>{{ registro.latitud }}</td>
+                    <td>{{ registro.longitud }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <hr>
+        
+        <h3 class="section-title">Gráfico: Cantidad de Vehículos</h3>
+        <div class="chart-container">
+            <canvas id="graficoTráfico" height="100"></canvas>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('graficoTráfico').getContext('2d');
+
+        const labels = [
+            {% for registro in datos reversed %}
+                "{{ registro.fecha_hora|date:'H:i' }}",
+            {% endfor %}
+        ];
+
+        const data = {
+            labels: labels,
+            datasets: [{
+                label: 'Cantidad de Vehículos',
+                data: [
+                    {% for registro in datos reversed %}
+                        {{ registro.cantidad_vehiculos }},
+                    {% endfor %}
+                ],
+                borderColor: 'rgba(67, 97, 238, 1)',
+                backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                fill: true,
+                tension: 0.4,
+                borderWidth: 2,
+                pointBackgroundColor: 'rgba(67, 97, 238, 1)',
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        };
+
+        new Chart(ctx, {
+            type: 'line',
+            data: data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                },
+                scales: {
+                    x: {
+                        title: { 
+                            display: true, 
+                            text: 'Hora',
+                            color: '#666',
+                            font: {
+                                weight: 'bold'
+                            }
+                        },
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: { 
+                            display: true, 
+                            text: 'Vehículos',
+                            color: '#666',
+                            font: {
+                                weight: 'bold'
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
+                }
+            }
+        });
+    </script>
+</body>
+</html>
