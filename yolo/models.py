@@ -40,3 +40,14 @@ class SeguimientoVehiculo(models.Model):
 
     def __str__(self):
         return f"{self.fecha_hora} - {self.velocidad_detectada} km/h"
+
+class SeguimientoVehiculo(models.Model):
+    fecha_hora = models.DateTimeField()
+    velocidad_detectada = models.DecimalField(max_digits=5, decimal_places=2)
+    camara_id = models.IntegerField()
+    vehiculo_id = models.IntegerField()
+
+    class Meta:
+        app_label = 'yolo'
+        db_table = 'movilidad_seguimientovehiculo'
+        managed = False
